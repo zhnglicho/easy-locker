@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">超简单锁屏</string>
+    <string name="device_admin_description">允许超简单锁屏在倒计时结束后锁定屏幕。</string>
+</resources>
