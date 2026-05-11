@@ -6,13 +6,17 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# 限制 Token 权限为只读
+permissions:
+  contents: read
+
 jobs:
   privacy-scan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Privado CLI
         run: |
@@ -23,7 +27,7 @@ jobs:
         run: privado scan . --non-interactive
 
       - name: Upload Scan Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea23f8d10f0ad6739a830d133 # v4.4.3
         with:
           name: privado-results
           path: .privado/
