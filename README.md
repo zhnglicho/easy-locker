@@ -5,6 +5,8 @@
 [![开源协议](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-blue.svg)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-green.svg)](https://developer.android.com/jetpack/compose)
+[![Internet: None](https://img.shields.io/badge/Internet-None-brightgreen.svg)](#项目介绍)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/zhnglicho/easy-locker/badge)](https://scorecard.dev/viewer/?uri=github.com/zhnglicho/easy-locker)
 
 ## 项目介绍
 
@@ -14,6 +16,17 @@ Easy Locker 是一个专注于“定时自动锁屏”的本地工具 App。在�
 - **极简稳定**：不做复杂监控，只解决“约定时间到了就锁屏”的问题。
 - **本地运行**：无需网络，无后台上传，保护隐私。
 - **体验友好**：提供倒计时提醒，让孩子有心理准备，减少冲突。
+
+## 隐私与安全 (Privacy & Security)
+
+**Easy Locker 承诺保护您的每一比特隐私：**
+
+- **🚫 无网络权限**：应用在清单文件中未声明 `INTERNET` 权限，从物理上隔绝了任何数据外泄的可能。
+- **Zero Telemetry**：应用不包含任何第三方统计、追踪或分析 SDK（如 Firebase Analytics, Umeng 等）。
+- **数据本地化**：所有计时记录和设置仅保存在您的设备本地（Room 数据库），卸载应用后数据即刻清除。
+- **自动化审计**：
+    - 我们集成 [Privado](https://github.com/Privado-Inc/privado) 隐私扫描工具，持续监测代码中的隐私合规风险。
+    - 通过 [OpenSSF Scorecard](https://scorecard.dev/) 对项目进行安全评分，确保依赖项透明且安全。
 
 ## 界面截图
 

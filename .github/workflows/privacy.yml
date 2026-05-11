@@ -1,0 +1,29 @@
+name: Privado Privacy Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  privacy-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Privado CLI
+        run: |
+          curl -o- https://raw.githubusercontent.com/Privado-Inc/privado-cli/main/install.sh | bash
+          echo "$HOME/.privado/bin" >> $GITHUB_PATH
+
+      - name: Run Privado Scan
+        run: privado scan . --non-interactive
+
+      - name: Upload Scan Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: privado-results
+          path: .privado/
