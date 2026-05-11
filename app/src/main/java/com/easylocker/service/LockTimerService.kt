@@ -74,6 +74,15 @@ class LockTimerService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        // 用户从最近任务列表划掉应用时触发
+        if (!completedNormally && !recordWritten) {
+            lockDevice()
+            finishSession(UsageStatus.EARLY_ENDED)
+        }
+    }
+
     override fun onDestroy() {
         timerJob?.cancel()
         releaseWakeLock()
@@ -150,6 +159,7 @@ class LockTimerService : Service() {
 
     private fun finishSession(status: UsageStatus) {
         timerJob?.cancel()
+        lockDevice() // 手动结束也触发锁屏
         scope.launch {
             writeRecord(status, System.currentTimeMillis())
             clearActiveSession()

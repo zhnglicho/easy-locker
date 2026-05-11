@@ -97,7 +97,14 @@ cd easy-locker
 
 本项目使用 Apache License 2.0 开源协议，详情见 [LICENSE](LICENSE)。
 
+## 关注公众号
+
+|  微信公众号                                  |
+|-------------------------------------|
+| ![定时设置](assets/qrcode.jpg) |
+
 ## 联系方式
+
 
 - GitHub: [@zhnglicho](https://github.com/zhnglicho)
 - 主页: [https://github.com/zhnglicho](https://github.com/zhnglicho)

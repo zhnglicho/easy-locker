@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -30,12 +31,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -151,6 +154,33 @@ private fun HomeScreen(
         durationMinutes
     }
 
+    var showStopConfirm by remember { mutableStateOf(false) }
+
+    if (showStopConfirm) {
+        AlertDialog(
+            onDismissRequest = { showStopConfirm = false },
+            title = { Text("确认提前结束？") },
+            text = { Text("提前结束计时也会立即触发锁屏，以确保使用约定的有效性。") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showStopConfirm = false
+                        onStopTimer()
+                    }
+                ) {
+                    Text("确定结束并锁屏", color = Color(0xFFE85050), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStopConfirm = false }) {
+                    Text("取消", color = TextSecondary)
+                }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(20.dp)
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -213,7 +243,11 @@ private fun HomeScreen(
 
         Button(
             onClick = {
-                if (isTimerActive) onStopTimer() else onStartTimer(durationMinutes, reminderMinutes)
+                if (isTimerActive) {
+                    showStopConfirm = true
+                } else {
+                    onStartTimer(durationMinutes, reminderMinutes)
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -527,6 +561,9 @@ private fun InfoCard(text: String, onClick: (() -> Unit)?) {
 private fun UsageScreen(records: List<UsageRecordEntity>) {
     val todayRecords = records.filter { isToday(it.startTime) }
     val totalTodayMinutes = todayRecords.sumOf { it.durationMinutes }
+    
+    // 状态：记录哪些日期是展开的。默认展开“今日”
+    var expandedGroups by remember { mutableStateOf(setOf("今日")) }
 
     Column(
         modifier = Modifier
@@ -565,23 +602,47 @@ private fun UsageScreen(records: List<UsageRecordEntity>) {
                 }
             } else {
                 groups.forEach { (dateTitle, items) ->
+                    val isExpanded = expandedGroups.contains(dateTitle)
+                    
                     item {
                         val dayDuration = items.sumOf { it.durationMinutes }
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    expandedGroups = if (isExpanded) {
+                                        expandedGroups - dateTitle
+                                    } else {
+                                        expandedGroups + dateTitle
+                                    }
+                                }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(dateTitle, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.width(8.dp))
                             Text(
-                                "共 ${items.size} 次 · ${formatDuration(dayDuration)}",
+                                "(${items.size} 次 · ${formatDuration(dayDuration)})",
                                 color = TextSecondary,
-                                fontSize = 13.sp
+                                fontSize = 13.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Icon(
+                                painter = painterResource(
+                                    id = if (isExpanded) R.drawable.ic_timer_24 else R.drawable.ic_history_24 
+                                    // 这里暂时借用现有图标演示，实际建议用箭头图标 ic_expand_more/less
+                                ),
+                                contentDescription = null,
+                                tint = TextSecondary,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
-                    items(items, key = { it.id }) { record ->
-                        UsageRecordCard(record)
+                    
+                    if (isExpanded) {
+                        items(items, key = { it.id }) { record ->
+                            UsageRecordCard(record)
+                        }
                     }
                 }
                 item { Spacer(Modifier.height(20.dp)) }
