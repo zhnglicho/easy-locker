@@ -1,6 +1,11 @@
 package com.easylocker.ui
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -46,6 +51,10 @@ class ReminderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val reminderMinutes = intent.getIntExtra(EXTRA_MINUTES, 1).coerceIn(1, 3)
+        
+        // 触发震动提醒
+        vibrateOnReminder()
+        
         setContent {
             EasyLockerTheme {
                 ReminderScreen(
@@ -58,6 +67,43 @@ class ReminderActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_MINUTES = "extra_minutes"
+    }
+    
+    /**
+     * 提醒界面显示时触发震动
+     * 震动模式：短-停-短-停-长（与服务的震动节奏一致）
+     */
+    private fun vibrateOnReminder() {
+        try {
+            // 震动模式：震动时间(毫秒), 停止时间, 震动时间, 停止时间...
+            val pattern = longArrayOf(0, 200, 100, 200, 100, 500)
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                // Android 12+ 使用 VibratorManager
+                val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibrator = vibratorManager.defaultVibrator
+                if (vibrator.hasVibrator()) {
+                    val vibrationEffect = VibrationEffect.createWaveform(pattern, -1)
+                    vibrator.vibrate(vibrationEffect)
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Android 8.0 - 11 使用 VibrationEffect
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                if (vibrator.hasVibrator()) {
+                    val vibrationEffect = VibrationEffect.createWaveform(pattern, -1)
+                    vibrator.vibrate(vibrationEffect)
+                }
+            } else {
+                // Android 8.0 以下使用旧 API
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                if (vibrator.hasVibrator()) {
+                    vibrator.vibrate(pattern, -1)
+                }
+            }
+        } catch (e: Exception) {
+            // 震动失败不阻断提醒流程
+            e.printStackTrace()
+        }
     }
 }
 
